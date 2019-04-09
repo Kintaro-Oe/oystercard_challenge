@@ -11,4 +11,8 @@ class Oystercard
     raise "Top up exceedes #{LIMIT} pound maximum balance" if @balance + amount > LIMIT
     @balance += amount
   end
+
+  def deduct(fare)
+    @balance -= fare
+  end
 end
