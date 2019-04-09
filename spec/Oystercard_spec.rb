@@ -14,12 +14,14 @@ describe Oystercard do
     end
 
     it 'raises an error if card balance exceeds limit' do
-      expect { subject.top_up(100) }.to raise_error("Top up exceedes #{Oystercard::LIMIT} pound maximum balance")
+      limit = Oystercard::LIMIT
+      subject.top_up(limit)
+      expect { subject.top_up(1) }.to raise_error("Top up exceedes #{Oystercard::LIMIT} pound maximum balance")
     end
   end
 
   it "#deduct removes money from card" do
-    expect { subject.deduct(5) }.to change { subject.balance }.from(0).to(-5)
+    expect { subject.deduct(5) }.to change { subject.balance }.by(-5)
   end
 
   it "#touch_in changes @in_use to true" do
