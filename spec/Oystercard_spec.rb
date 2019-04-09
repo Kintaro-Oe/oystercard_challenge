@@ -21,4 +21,21 @@ describe Oystercard do
   it "#deduct removes money from card" do
     expect { subject.deduct(5) }.to change { subject.balance }.from(0).to(-5)
   end
+
+  it "#touch_in changes @in_use to true" do
+    expect { subject.touch_in }.to change { subject.in_use }.from(false).to(true)
+  end
+
+  it "#touch_out changes @in_use to false" do
+    subject.touch_in
+    expect { subject.touch_out }.to change { subject.in_use }.from(true).to(false)
+  end
+
+  context "#in_journey?" do
+    it "checks whether card is @in_use" do
+      expect(subject.in_journey?).to eq false
+      subject.touch_in
+      expect(subject.in_journey?).to eq true
+    end
+  end
 end
