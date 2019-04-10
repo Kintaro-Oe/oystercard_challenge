@@ -20,8 +20,8 @@ describe Oystercard do
     end
   end
 
-  describe "#deduct" do
-    it "removes money from card" do
+  describe "#deduct" do   #read up on how to test private methods. Pro or Con
+    xit "removes money from card" do
       expect { subject.deduct(5) }.to change { subject.balance }.by(-5)
     end
   end
@@ -44,6 +44,10 @@ describe Oystercard do
       subject.top_up(Oystercard::MIN_BALANCE)
       subject.touch_in
       expect { subject.touch_out }.to change { subject.in_use }.from(true).to(false)
+    end
+
+    it "deducts minimum fare from card balance" do
+      expect { subject.touch_out }.to change { subject.balance }.by(-Oystercard::MIN_FARE)
     end
   end
 
