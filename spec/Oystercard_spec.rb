@@ -1,7 +1,8 @@
 require 'oystercard'
 
 describe Oystercard do
-  let(:station) { double(:station1) }
+  let(:station_in) { double(:station1) }
+  let(:station_out) { double(:station2) }
 
   describe "#balance" do
     it { is_expected.to respond_to(:balance) }
@@ -22,27 +23,27 @@ describe Oystercard do
     end
   end
 
-  describe "#deduct" do   #read up on how to test private methods. Pro or Con
-    xit "removes money from card" do
-      expect { subject.deduct(5) }.to change { subject.balance }.by(-5)
-    end
-  end
+  # describe "#deduct" do   #this is private, we no longer need to test it. Read up on why, if unsure :)
+  #   it "removes money from card" do
+  #     expect { subject.deduct(5) }.to change { subject.balance }.by(-5)
+  #   end
+  # end
 
   describe "#touch_in" do
     it "changes @in_use to true" do
       subject.top_up(Oystercard::MIN_BALANCE)
-      expect { subject.touch_in(station) }.to change { subject.in_use }.from(false).to(true)
+      expect { subject.touch_in(station_in) }.to change { subject.in_use }.from(false).to(true)
     end
 
     it "remembers the entry station" do
       subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station)
-      expect(subject.entry_station).to eq(station)
+      subject.touch_in(station_in)
+      expect(subject.entry_station).to eq(station_in)
     end
 
     context "balance is less than MINIMUM" do
       it "raises an error" do
-        expect { subject.touch_in(station) }.to raise_error("Insufficient balance")
+        expect { subject.touch_in(station_in) }.to raise_error("Insufficient balance")
       end
     end
   end
@@ -50,26 +51,34 @@ describe Oystercard do
   describe "#touch_out" do
     it "changes @in_use to false" do
       subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station)
-      expect { subject.touch_out }.to change { subject.in_use }.from(true).to(false)
+      subject.touch_in(station_in)
+      expect { subject.touch_out(station_out) }.to change { subject.in_use }.from(true).to(false)
     end
 
     it "deducts minimum fare from card balance" do
-      expect { subject.touch_out }.to change { subject.balance }.by(-Oystercard::MIN_FARE)
+      expect { subject.touch_out(station_out) }.to change { subject.balance }.by(-Oystercard::MIN_FARE)
     end
 
     it "removes entry station" do
       subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station)
-      subject.touch_out
+      subject.touch_in(station_in)
+      subject.touch_out(station_out)
       expect(subject.entry_station).to eq(nil)
     end
+
+    it "returns nil for exit_station" do
+      subject.top_up(Oystercard::MIN_BALANCE)
+      subject.touch_in(station_in)
+      subject.touch_out(station_out)
+      expect(subject.exit_station).to eq(nil)
+    end
+
   end
 
   describe "#in_journey?" do
     it "checks whether card is @in_use" do
       subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station)
+      subject.touch_in(station_in)
       expect(subject.in_journey?).to eq true
     end
 
@@ -78,4 +87,16 @@ describe Oystercard do
     end
   end
 
+  describe "#history" do
+    it "returns empty list for a new card" do
+      expect(subject.history).to eq([])
+    end
+
+    it "#touching in and out creates one journey" do
+      subject.top_up(Oystercard::MIN_BALANCE)
+      subject.touch_in(station_in)
+      subject.touch_out(station_out)
+      expect(subject.history).to include(station_in => station_out)
+    end
+  end
 end
