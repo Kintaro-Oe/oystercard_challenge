@@ -8,8 +8,8 @@ class Oystercard
   def initialize
     @balance = 0
     @in_use = false
-    @entry_station = nil
-    @exit_station = nil
+    # @entry_station = nil
+    # @exit_station = nil
     @history = []
   end
 
@@ -18,26 +18,24 @@ class Oystercard
     @balance += amount
   end
 
-  def touch_in(station_in)
+  def touch_in(entry_station)
+    @journey = Journey.new(entry_station)
     if @balance < MIN_BALANCE
      fail "Insufficient balance"
     else
       @in_use = true
-      @entry_station = station_in
+    #@entry_station = entry_station
     end
   end
 
-  def touch_out(station_out)
+  def touch_out(exit_station)
     deduct(MIN_FARE)
     @in_use = false
-    @exit_station = station_out
-    @history << {@entry_station => @exit_station}
-    @entry_station = nil
-    @exit_station = nil
-  end
-
-  def in_journey?
-    !!@entry_station
+    @journey.exit_station = exit_station
+    #@exit_station = exit_station
+    @history << {@journey.entry_station => @journey.exit_station}
+    #@entry_station = nil
+    #@exit_station = nil
   end
 
   private

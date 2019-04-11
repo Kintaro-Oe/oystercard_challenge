@@ -35,12 +35,6 @@ describe Oystercard do
       expect { subject.touch_in(station_in) }.to change { subject.in_use }.from(false).to(true)
     end
 
-    it "remembers the entry station" do
-      subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station_in)
-      expect(subject.entry_station).to eq(station_in)
-    end
-
     context "balance is less than MINIMUM" do
       it "raises an error" do
         expect { subject.touch_in(station_in) }.to raise_error("Insufficient balance")
@@ -49,9 +43,14 @@ describe Oystercard do
   end
 
   describe "#touch_out" do
-    it "changes @in_use to false" do
+    let(:subject) {
+      subject = described_class.new
       subject.top_up(Oystercard::MIN_BALANCE)
       subject.touch_in(station_in)
+      subject
+    }
+
+    it "changes @in_use to false" do
       expect { subject.touch_out(station_out) }.to change { subject.in_use }.from(true).to(false)
     end
 
@@ -60,31 +59,15 @@ describe Oystercard do
     end
 
     it "removes entry station" do
-      subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station_in)
       subject.touch_out(station_out)
       expect(subject.entry_station).to eq(nil)
     end
 
     it "returns nil for exit_station" do
-      subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station_in)
       subject.touch_out(station_out)
       expect(subject.exit_station).to eq(nil)
     end
 
-  end
-
-  describe "#in_journey?" do
-    it "checks whether card is @in_use" do
-      subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(station_in)
-      expect(subject.in_journey?).to eq true
-    end
-
-    it "checks a new card is not @in_use" do
-      expect(subject.in_journey?).to eq false
-    end
   end
 
   describe "#history" do
